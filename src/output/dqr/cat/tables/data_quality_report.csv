@@ -1,0 +1,13 @@
+Feature,Count,Missing %,Cardinality,Mode 1,Mode 1 Frequency,Mode 1 %,Mode 2,Mode 2 Frequency,Mode 2 %
+Employment_Type,10000,19.59,4,Part-time employed,2689,26.89,Self-employed,2677,26.77
+Current_Account,10000,0.0,2,True,6321,63.21,False,3679,36.79
+Savings_Account,10000,0.0,2,True,5335,53.35,False,4665,46.65
+Credit_Card,10000,0.0,2,False,5915,59.15,True,4085,40.85
+Personal_Loan,10000,0.0,2,False,6690,66.9,True,3310,33.1
+Home_Loan,10000,0.0,2,False,7792,77.92,True,2208,22.08
+Vehicle_Loan,10000,0.0,2,False,8199,81.99,True,1801,18.01
+Online_Banking_Registered,10000,0.0,2,False,5658,56.58,True,4342,43.42
+Mobile_App_Registered,10000,0.0,2,True,6396,63.96,False,3604,36.04
+Suburb,10000,6.91,10,Sandton,1070,10.7,Fourways,1057,10.57
+City,10000,0.0,3,Johannesburg,3368,33.68,Cape Town,3319,33.19
+Province,10000,0.0,3,Gauteng,3368,33.68,Western Cape,3319,33.19

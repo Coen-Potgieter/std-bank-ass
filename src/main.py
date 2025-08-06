@@ -1,86 +1,127 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import sys
+from tabulate import tabulate
+from helper_funcs import (
+    print_heading,
+    get_cardinality,
+    prepare_directory,
+    save_data_quality_report,
+    get_mode_info,
+    get_numerical_stats,
+    plot_histograms,
+    plot_categorical_bars,
+)
 
 
-def return_columns(data: pd.DataFrame):
-    print(data.columns)
+def data_quality_report(data: pd.DataFrame, dir_path: str, is_cat: bool):
+    """
+    Creates DQR, and puts all data in given directory
 
+    Params:
+        - `data`: csv data
+        - `dir_path`: Directory where both DQR table and graphs will be stored
+        - `is_cat`: True for categorical data, False for continuous data
+    """
 
-def get_column_data(data: pd.DataFrame, *args):
+    # Prepare Directory
+    print_heading(f"Preparing Given Directory `{dir_path}`")
+    graphs_dir_path, tables_dir_path = prepare_directory(dir_path)
 
-    if len(args) != 1:
-        print(
-            "ERROR: Must Either Pass A String Or An Integer With Data Frame To `get_column_data()`"
-        )
-        sys.exit(1)
+    # Get Data
+    print_heading("Creating DQR")
+    card_counts = get_cardinality(data, debug=False)
+    null_counts = pd.isna(data).sum(axis=0)
+    additional_data = get_mode_info(data) if is_cat else get_numerical_stats(data)
 
-    if isinstance(args[0], int):
-        index = args[0]
-        num_columns = len(data.columns)
+    # Create Table
+    dqr_column_names = ["Feature", "Count", "Missing %", "Cardinality"]
+    data_quality_report = {name: [] for name in dqr_column_names}
 
-        if index < 0 or index > num_columns:
-            print(
-                f"ERROR: Given index: {index} is out of range. Must be between 0 and {num_columns-1}"
-            )
-            sys.exit(1)
-        return data[index]
+    num_records = data.shape[0]
+    for name in data.columns.tolist():
+        null_percentage = round((null_counts[name] / num_records) * 100, 2)
+        data_quality_report["Feature"].append(name)
+        data_quality_report["Count"].append(num_records)
+        data_quality_report["Missing %"].append(null_percentage)
+        data_quality_report["Cardinality"].append(card_counts[name])
 
-    elif isinstance(args[0], str):
-        col_name = args[0]
+    # Print DQR
+    df_dqr = pd.DataFrame(data_quality_report).join(additional_data)
+    print(tabulate(df_dqr, headers="keys", tablefmt="psql", showindex=False))
 
-        if not col_name in data.columns:
-            print(f"ERROR: Given Column Name: {col_name} does not exist...")
-            sys.exit(1)
-        return data[col_name]
+    # Save DQR
+    print_heading("Saving DQR")
+    save_data_quality_report(df_dqr, tables_dir_path)
 
+    # Save Plots
+    print_heading("Creating Plots")
+
+    if is_cat:
+        plot_categorical_bars(data, graphs_dir_path)
     else:
-        print(
-            "ERROR: Second Parameter passed to `get_column_data()` is nor a string or an int..."
-        )
-        sys.exit(1)
-
-
-def checkNull(data, column_number):
-
-    column_data = get_column_data(data, column_number)
-
-
-def print_unique_vals(data, column_number):
-    pass
-
-
-def handle_missing_vals(df):
-    # Check for missing values
-    print(df.isnull().sum())
-
-    # Visualize missing values
-    plt.figure(figsize=(10, 6))
-    sns.heatmap(df.isnull(), cbar=False, cmap="viridis")
-    plt.title("Missing Values Heatmap")
-    plt.show()
-
-    # Handle missing values (choose appropriate methods)
-    # df = df.dropna()  # Drop rows with missing values
-    # df['column'] = df['column'].fillna(df['column'].mean())  # Fill with mean
-    # df['column'] = df['column'].fillna(df['column'].mode()[0])  # Fill with mode
+        plot_histograms(data, graphs_dir_path)
 
 
 def main():
-
     csv_path = "./data/SBSA_DS_2026.csv"
     data = pd.read_csv(csv_path)
 
-    handle_missing_vals(data)
+    categorical_columns = [
+        "Employment_Type",
+        "Current_Account",
+        "Savings_Account",
+        "Credit_Card",
+        "Personal_Loan",
+        "Home_Loan",
+        "Vehicle_Loan",
+        "Online_Banking_Registered",
+        "Mobile_App_Registered",
+        "Suburb",
+        "City",
+        "Province",
+    ]
+
+    continuous_columns = [
+        "Age",
+        "Annual_Income_Estimate",
+        "Current_Account_Balance",
+        "Savings_Account_Balance",
+        "Credit_Card_Balance",
+        "Personal_Loan_Balance",
+        "Home_Loan_Balance",
+        "Vehicle_Loan_Balance",
+        "Online_Banking_Txns",
+        "Mobile_App_Txns",
+        "Credit_Score",
+    ]
+
+    data_quality_report(
+        data.loc[:, categorical_columns], "./output/dqr/cat/", is_cat=True
+    )
+
+    # data_quality_report(
+    #     data.loc[:, continuous_columns], "./output/dqr/cts/", is_cat=False
+    # )
     return
-    # print(data.head())
+    get_sample_vals(data.iloc[:, 0], 10, True)
+    return
+    # counts = get_cardinality(data, True)
+    types = data.info()
+    print(data.dtypes)
+    return
+
+    # handle_missing_vals(data)
+    # return
 
     # Get dataframe info (data types, non-null counts)
-    print(data.info())
+    # print(data.info())
 
-    print(data.describe(include="all"))
+    target_columns = data.columns[0:5]
+
+    # print(target_columns)
+
+    target_data = data.iloc[:, 1:5]
+    print(target_data.describe())
+    # print(data[-1].describe(include="all"))
 
     return
 
