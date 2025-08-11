@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from seaborn import cubehelix_palette
 from tabulate import tabulate
 from helper_funcs import (
     print_heading,
@@ -9,6 +11,12 @@ from helper_funcs import (
     get_numerical_stats,
     plot_histograms,
     plot_categorical_bars,
+    sepearate_mobile_online_offline,
+    inspect_low_age_records,
+    clean_age_anomalies,
+    explore_non_active_mobile_users,
+    explore_online_vs_mobile_banking,
+    nice_print_mobile_txns,
 )
 
 
@@ -65,6 +73,22 @@ def main():
     csv_path = "./data/SBSA_DS_2026.csv"
     data = pd.read_csv(csv_path)
 
+    data = clean_age_anomalies(data, debug=True)
+
+    # inspect_low_age_records(data, cutoff_age=18)
+
+    # explore_online_vs_mobile_banking(data)
+    nice_print_mobile_txns(data)
+    explore_non_active_mobile_users(data)
+    # sepearate_mobile_online_offline(data)
+    return
+    return
+
+    # sepearate_mobile_online_offline(data)
+    explore_online_vs_mobile_banking(data)
+    return
+
+    return
     categorical_columns = [
         "Employment_Type",
         "Current_Account",
